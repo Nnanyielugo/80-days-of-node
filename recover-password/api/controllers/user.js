@@ -112,8 +112,8 @@ export const forgotpwd = (req, res, next) => {
         to: promiseObj.user.email,
         from: 'Password Reset <noreply@passwordReset.com>',
         subject: 'Password Reset',
-        text: 'You are recieving this because blah blah blah' +
-          'Please click on the link to reset your password' +
+        text: 'You are recieving this because blah blah blah. ' +
+          'Please click on the link to reset your password: ' + '\n\n' +
           'http://' + req.headers.host + '/reset/' + promiseObj.token
       }
 
@@ -124,7 +124,7 @@ export const forgotpwd = (req, res, next) => {
         .catch(err => {
           reject(err)
         })
-    })
+    });
   }
 
   function errorResponse (err) {
@@ -146,4 +146,80 @@ export const forgotpwd = (req, res, next) => {
   .then(sendEmail)
   .then(successResponse)
   .catch(errorResponse)
+}
+
+export const resetToken = (req, res, next) => {
+  function pwdresetToken () {
+    return new Promise((resolve, reject) => {
+      User.findOne({ resetPasswordToken: req.params.token , resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
+        if (err) reject(err);
+        if (!user) {
+          return res.status(422).json({
+            errors: {
+              error: 'No account with that email address exists'
+            }
+          });
+        }
+
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        user.setPassword(req.body.password);
+
+        user.save()
+          .then(() => {
+            // res.json({
+            //   user: user.toAuthJSON()
+            // });
+            resolve(user)
+          })
+          .catch(next)
+      })
+    })
+  }
+
+  function sendEmail (user) {
+    return new Promise((resolve, reject) => {
+      const transport = nodemailer.createTransport(
+        sendgrid({
+          apiKey: apiKey
+        })
+      );
+
+      const options = {
+        to: user.email,
+        from: 'Password Reset <noreply@passwordReset.com>',
+        subject: 'Your password has been changed',
+        text: 'Hello ' + user.username + '\n\n' +
+          'This is a confirmation that the password for your account ' + user.email + ' has just been changed.'      
+      }
+
+      transport.sendMail(options)
+        .then(() => {
+          resolve(user)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
+  }
+
+  function errorResponse (err) {
+    res.status(422).json({
+      errors: {
+        error: err
+      }
+    });
+  }
+
+  function successResponse (user) {
+    res.status(202).json({
+      message: 'Success! Your password has been changed.',
+      user: user.toAuthJSON()
+    });
+  }
+
+  pwdresetToken()
+    .then(sendEmail)
+    .then(successResponse)
+    .catch(errorResponse);
 }
