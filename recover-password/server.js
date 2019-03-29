@@ -5,7 +5,7 @@ import logger from 'morgan';
 
 import './api/db';
 import './api/auth/passport';
-import api from './api/routes/user'
+import api from './api/'
 
 const app = express();
 const port = process.env.PORT || 5003;

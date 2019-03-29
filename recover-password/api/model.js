@@ -1,11 +1,11 @@
-import mongoose from 'mongoose';
+import { model, Schema } from 'mongoose';
 import validator from 'mongoose-unique-validator';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 
 import { SECRET } from '~/config/config';
 
-const UserSchema = new mongoose.Schema({
+const UserSchema = new Schema({
   username: { 
     type: String,
     required: [true, 'can\'t be blank'],
@@ -58,6 +58,6 @@ UserSchema.methods.toAuthJSON = function() {
   }
 }
 
-const User = mongoose.model('user', UserSchema);
+const User = model('user', UserSchema);
 
 export default User;

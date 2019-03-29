@@ -1,13 +1,13 @@
 import express from 'express';
 
-import auth from '../auth/auth';
+import auth from './auth/auth';
 import { 
   login,
   signup,
   getUser,
   forgotpwd,
   resetToken
-} from '../controllers/user';
+} from './controller';
 
 const router = express.Router();
 

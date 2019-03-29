@@ -16,4 +16,4 @@ mongoose.connection.on('disconnected', function() {
   console.log('Mongoose disconnected');
 })
 
-import './models/user';
+import './model';

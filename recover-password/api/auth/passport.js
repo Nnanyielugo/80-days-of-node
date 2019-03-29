@@ -1,8 +1,8 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import mongoose from 'mongoose';
+import { model } from 'mongoose';
 
-const User = mongoose.model('user');
+const User = model('user');
 
 // login
 passport.use(new LocalStrategy({

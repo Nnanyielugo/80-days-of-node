@@ -167,9 +167,6 @@ export const resetToken = (req, res, next) => {
 
         user.save()
           .then(() => {
-            // res.json({
-            //   user: user.toAuthJSON()
-            // });
             resolve(user)
           })
           .catch(next)
