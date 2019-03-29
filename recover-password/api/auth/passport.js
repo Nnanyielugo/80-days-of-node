@@ -9,7 +9,6 @@ passport.use(new LocalStrategy({
   usernameField: 'email',
   passwordField: 'password',
 }, (email, password, done) => {
-  console.log('fetching', email)
   User.findOne({email: email})
     .then(user => {
       
