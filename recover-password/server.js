@@ -5,7 +5,7 @@ import logger from 'morgan';
 
 import './api/db';
 import './api/auth/passport';
-import api from './api/'
+import api from './api/';
 
 const app = express();
 const port = process.env.PORT || 5003;
@@ -14,8 +14,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 app.use(helmet());
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use('/api', api)
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use('/api', api);
 
 // error handlers
 app.use((req, res, next) => {

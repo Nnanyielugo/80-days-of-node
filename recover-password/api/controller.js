@@ -11,14 +11,14 @@ const User = model('user');
 export const getUser = (req, res, next) => {
   User
     .findById(req.payload.id)
-      .then(user => {
-        if (!user) return res.sendStatus(401);
-        return res.json({
-          user: user.toAuthJSON()
-        });
-      })
-      .catch(next)
-}
+    .then((user) => {
+      if (!user) return res.sendStatus(401);
+      return res.json({
+        user: user.toAuthJSON(),
+      });
+    })
+    .catch(next);
+};
 
 export const signup = (req, res, next) => {
   const user = new User();
@@ -28,84 +28,81 @@ export const signup = (req, res, next) => {
 
   user
     .save()
-    .then(() => {
-      return res.json({
-        user: user.toAuthJSON()
-      });
-    })
+    .then(() => res.json({
+      user: user.toAuthJSON(),
+    }))
     .catch(next);
-}
+};
 
 export const login = (req, res, next) => {
   if (!req.body.email) {
     return res.status(422).json({
       errors: {
-        error: 'Email can\'t be blank'
-      }
-    })
+        error: 'Email can\'t be blank',
+      },
+    });
   }
 
   if (!req.body.password) {
     return res.status(422).json({
       errors: {
-        error: 'Password can\'t be blank'
-      }
-    })
+        error: 'Password can\'t be blank',
+      },
+    });
   }
 
-  passport.authenticate('local', {session: false}, function(err, user, info) {
+  passport.authenticate('local', { session: false }, (err, user, info) => {
     if (err) return next(err);
     if (!user) return res.status(422).json(info);
 
-      user.token = user.generateJWT();
-      return res.json({
-        user: user.toAuthJSON()
-      })
-  })(req, res, next)
-}
+    user.token = user.generateJWT();
+    return res.json({
+      user: user.toAuthJSON(),
+    });
+  })(req, res, next);
+};
 
 export const forgotpwd = (req, res, next) => {
   function generateToken() {
     return new Promise((resolve, reject) => {
-      crypto.randomBytes(16, function(err, buffer) {
+      crypto.randomBytes(16, (err, buffer) => {
         const token = buffer.toString('hex');
-        resolve(token)
-      })
-    })
+        resolve(token);
+      });
+    });
   }
 
-  function updateUserToken (token) {
+  function updateUserToken(token) {
     return new Promise((resolve, reject) => {
       User.findOne({ email: req.body.email }, (err, user) => {
         if (!user) {
           return res.status(422).json({
             errors: {
-              error: 'No account with that email address exists'
-            }
+              error: 'No account with that email address exists',
+            },
           });
         }
-  
+
         user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000 // 1 hour
-        
-        user.save((err) => {
-         
-          if (err) reject(err);
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+        user.save((error) => {
+          if (error) reject(error);
           resolve({
             token,
-            user
-          })
-        })
-      })
-    })
+            user,
+          });
+        });
+      });
+    });
   }
 
-  function sendEmail (promiseObj) {
+  function sendEmail(promiseObj) {
     return new Promise((resolve, reject) => {
       const transport = nodemailer.createTransport(
         sendgrid({
-          apiKey: apiKey
-        })
+          apiKey,
+        }),
       );
 
       const options = {
@@ -118,46 +115,46 @@ export const forgotpwd = (req, res, next) => {
       }
 
       transport.sendMail(options)
-        .then(res => {
-          resolve(res)
+        .then((res) => {
+          resolve(res);
         })
-        .catch(err => {
-          reject(err)
-        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
 
-  function errorResponse (err) {
+  function errorResponse(err) {
     res.status(422).json({
       errors: {
-        error: err
-      }
+        error: err,
+      },
     });
   }
 
-  function successResponse (response) {
+  function successResponse() {
     res.status(202).json({
-      message: "Password reset token sent successfully"
-    })
+      message: 'Password reset token sent successfully',
+    });
   }
-  
+
   generateToken()
-  .then(updateUserToken)
-  .then(sendEmail)
-  .then(successResponse)
-  .catch(errorResponse)
-}
+    .then(updateUserToken)
+    .then(sendEmail)
+    .then(successResponse)
+    .catch(errorResponse);
+};
 
 export const resetToken = (req, res, next) => {
-  function pwdresetToken () {
+  function pwdresetToken() {
     return new Promise((resolve, reject) => {
-      User.findOne({ resetPasswordToken: req.params.token , resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
+      User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
         if (err) reject(err);
         if (!user) {
           return res.status(422).json({
             errors: {
               error: 'No account with that email address exists'
-            }
+            },
           });
         }
 
@@ -167,19 +164,19 @@ export const resetToken = (req, res, next) => {
 
         user.save()
           .then(() => {
-            resolve(user)
+            resolve(user);
           })
-          .catch(next)
-      })
-    })
+          .catch(next);
+      });
+    });
   }
 
-  function sendEmail (user) {
+  function sendEmail(user) {
     return new Promise((resolve, reject) => {
       const transport = nodemailer.createTransport(
         sendgrid({
-          apiKey: apiKey
-        })
+          apiKey,
+        }),
       );
 
       const options = {
@@ -188,30 +185,30 @@ export const resetToken = (req, res, next) => {
         subject: 'Your password has been changed',
         text: 'Hello ' + user.username + '\n\n' +
           'This is a confirmation that the password for your account ' + user.email + ' has just been changed.'      
-      }
+      };
 
       transport.sendMail(options)
         .then(() => {
-          resolve(user)
+          resolve(user);
         })
-        .catch(err => {
-          reject(err)
-        })
-    })
-  }
-
-  function errorResponse (err) {
-    res.status(422).json({
-      errors: {
-        error: err
-      }
+        .catch((err) => {
+          reject(err);
+        });
     });
   }
 
-  function successResponse (user) {
+  function errorResponse(err) {
+    res.status(422).json({
+      errors: {
+        error: err,
+      },
+    });
+  }
+
+  function successResponse(user) {
     res.status(202).json({
       message: 'Success! Your password has been changed.',
-      user: user.toAuthJSON()
+      user: user.toAuthJSON(),
     });
   }
 
@@ -219,4 +216,4 @@ export const resetToken = (req, res, next) => {
     .then(sendEmail)
     .then(successResponse)
     .catch(errorResponse);
-}
+};
