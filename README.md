@@ -2,4 +2,5 @@
 
 ### TODO:
 - [x] day 1 _password recovery_ (ongoing)
-- [ ] day 2 ??
+- [x] day 2 _stripe billing_ (ongoing)
+- [ ] day 3 _paypal billing **basic**_

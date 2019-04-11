@@ -12,14 +12,14 @@ const auth = {
   required: jwt({
     secret,
     userProperty: 'payload',
-    getToken: getTokenFromheader
+    getToken: getTokenFromheader,
   }),
   optional: jwt({
     secret,
     userProperty: 'payload',
     credentialsRequired: false,
-    getToken: getTokenFromheader
-  })
-}
+    getToken: getTokenFromheader,
+  }),
+};
 
 export default auth;
