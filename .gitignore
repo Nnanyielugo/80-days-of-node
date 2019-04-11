@@ -39,6 +39,9 @@ jspm_packages/
 # config files
 **/config
 
+# wepback output file
+**/public/client.min.js
+
 # TypeScript v1 declaration files
 typings/
 
